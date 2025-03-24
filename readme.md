@@ -3,7 +3,7 @@
 This guide will walk you through the process of deploying the `InstaNews` project, setting up dependencies, and configuring Nginx with load balancing.
 
 ---
-# Serring up web servers
+# Setting up web servers
 The following steps can be repeated to all webservers that you will need for the application. For our case, they are two, so we do it twice in each server.
 ## Step 1: Install Dependencies
 
