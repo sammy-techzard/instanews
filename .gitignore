@@ -51,6 +51,7 @@ docker-compose.override.yml
 # Build directories
 build/
 dist/
+logs/
 
 # Caches
 .cache/
