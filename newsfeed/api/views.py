@@ -24,7 +24,7 @@ def get_news(request):
         params = {
             "q": query,
             # "domains": domains,
-            "from": from_date,
+            #"from": from_date,
             # "to": "2025-03-24",
             "language": language,
             "sortBy": sort_by,

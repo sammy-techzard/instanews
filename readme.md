@@ -28,7 +28,7 @@ The following steps can be repeated to all webservers that you will need for the
 Clone the `InstaNews` project from GitHub:
 
 ```bash
-git clone https://github.com/sammy-techzard/instanews.git
+git clone https://github.com/Dengtiel/instanews-api-.git instanews
 cd instanews
 ```
 
@@ -123,7 +123,7 @@ Modify the `/etc/nginx/sites-available/instanews` file to define multiple backen
 
 upstream django_backend {
     # Define the backend servers (Django apps)
-    server 54.237.193.140:80;  # First server (Nginx on 80)
+    server 54.237.193.140:8000;  # First server (Nginx on 80)
     server 192.168.1.102:8000;  # Second server (Gunicorn on 8000)
 }
 
@@ -151,7 +151,7 @@ sudo ln -s /etc/nginx/sites-available/instanews /etc/nginx/sites-enabled/
 
 This configuration enables load balancing between two backend servers:
 
-- `54.237.193.140:80` (Nginx server)
+- `54.237.193.140:8000` (Nginx server)
 - `192.168.1.102:8000` (Gunicorn server)
 
 ### 2. **Restart Nginx for Load Balancing**
