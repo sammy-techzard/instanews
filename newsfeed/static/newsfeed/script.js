@@ -6,51 +6,52 @@ document.addEventListener("DOMContentLoaded", () => {
     const nextButton = document.getElementById("next-button");
     const preloader = document.getElementById("preloader");
     const current_feed_title = document.getElementById("current-feed");
+    
     let currentPage = 1;
     let totalResults = 0;
-    let query = "Today"; // Default query
+    let currentQuery = "Today";
+    let currentCategories = "general,tech";
+    const currentSort = "published_on";
+    const currentLimit = 10;
 
     nextButton.textContent = "Next";
     nextButton.classList.add("next-button");
-    nextButton.addEventListener("click", () => fetchNews(query, currentPage + 1));
+    nextButton.addEventListener("click", () => fetchNews(currentQuery, currentCategories, currentPage + 1));
 
-    function fetchNews(query, page = 1) {
-        const url = "/api/news";  // Backend API endpoint
+    function fetchNews(query, categories, page = 1) {
+        const url = "/api/news";
         const params = new URLSearchParams({
             q: query,
-            sortBy: "popularity",
+            categories: categories,
+            sort: currentSort,
             language: "en",
-            pageSize: 10,
+            limit: currentLimit,
             page: page,
         });
-        if (page === 1) {
-            tweetsContainer.innerHTML = "";  // Reset the container if it's the first page
-        }
-        current_feed_title.innerHTML = `Showing news for: ${query}`;
 
-        // Show preloader while fetching data
+        if (page === 1) {
+            tweetsContainer.innerHTML = "";
+        }
+        current_feed_title.innerHTML = `Showing news for: ${query} in ${categories}`;
         preloader.style.display = "block";
 
         fetch(`${url}?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
-                totalResults = data.totalResults;  // Get the total number of results
-                displayNews(data.articles);
+                totalResults = data.meta.found;
+                displayNews(data.data);
                 currentPage = page;
 
-                // Show/hide the next button based on total results and current page
-                if (currentPage * 10 >= totalResults) {
-                    nextButton.style.display = "none";  // Hide "Next" if there are no more results
+                if (currentPage * currentLimit < totalResults) {
+                    nextButton.style.display = "block";
                 } else {
-                    nextButton.style.display = "block";  // Show "Next" if there are more results
+                    nextButton.style.display = "none";
                 }
-
-                // Hide preloader once data is loaded
                 preloader.style.display = "none";
             })
             .catch(error => {
                 console.error("Error fetching news:", error);
-                preloader.style.display = "none"; // Hide preloader in case of error
+                preloader.style.display = "none";
             });
     }
 
@@ -65,22 +66,21 @@ document.addEventListener("DOMContentLoaded", () => {
             articleElement.innerHTML = `
                 <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
                 <p>${article.description}</p>
-                <p>${article.content}</p>
-                ${article.urlToImage ? `
+                <p>${article.snippet}</p>
+                ${article.image_url ? `
                 <div class="image-wrapper">
                     <div class="loader"></div>
-                    <img src="${article.urlToImage}" alt="News Image" />
+                    <img src="${article.image_url}" alt="News Image" />
                 </div>` : ""}
-                <p><strong>Source:</strong> ${article.source.name}</p>
-                <p><strong>Published At:</strong> ${new Date(article.publishedAt).toLocaleString()}</p>
+                <p><strong>Source:</strong> ${article.source}</p>
+                <p><strong>Published At:</strong> ${new Date(article.published_at).toLocaleString()}</p>
+                <p><strong>Categories:</strong> ${article.categories.join(', ')}</p>
             `;
             tweetsContainer.appendChild(articleElement);
 
-            // Add image load event
             const img = articleElement.querySelector('img');
             if (img) {
                 img.onload = () => {
-                    // Remove the blur effect and loader once image is fully loaded
                     img.classList.add('loaded');
                     const loader = articleElement.querySelector('.loader');
                     loader.style.display = 'none';
@@ -90,22 +90,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     searchButton.addEventListener("click", () => {
-        query = searchInput.value.trim();
-        if (query) {
-            currentPage = 1;  // Reset page to 1 when new search is done
-            fetchNews(query, currentPage);
-        }
+        currentQuery = searchInput.value.trim() || "Today";
+        currentPage = 1;
+        fetchNews(currentQuery, currentCategories, currentPage);
     });
 
     categoryButtons.forEach(button => {
         button.addEventListener("click", () => {
-            const category = button.getAttribute("data-category");
-            query = category;  // Set the query to the selected category
-            currentPage = 1;  // Reset page to 1 when category is changed
-            fetchNews(query, currentPage);
+            currentCategories = button.getAttribute("data-category");
+            currentPage = 1;
+            fetchNews(currentQuery, currentCategories, currentPage);
         });
     });
 
-    // Load default news on page load
-    fetchNews(query);
+    // Initial load with default parameters
+    fetchNews(currentQuery, currentCategories);
 });
