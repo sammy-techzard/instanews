@@ -4,7 +4,8 @@ This guide will walk you through the process of deploying the `InstaNews` projec
 
 ---
 # Setting up web servers
-The following steps can be repeated to all webservers that you will need for the application. For our case, they are two, so we do it twice in each server.
+The following steps can be repeated for all web servers required for the application. In our case, there are two, so we perform these steps twice, once for each server.
+
 ## Step 1: Install Dependencies
 
 1. **Install Python and its dependencies**  
@@ -37,7 +38,7 @@ cd instanews
 ## Step 3: Set Up Python Virtual Environment
 
 1. **Create and activate the virtual environment**  
-   This isolates your Python environment to ensure you don't conflict with global Python packages.
+   This isolates your Python environment to prevent conflicts with global Python packages.
 
    ```bash
    python3 -m venv .venv
@@ -72,8 +73,10 @@ cd instanews
    Paste your `NEWS_API_KEY` into the `.env` file:
 
    ```
-   NEWS_API_KEY=API_KEY_FROM_PROVIDER
+   NEWS_API_KEY=API_KEY_FROM_THENEWSAPI.COM
    ```
+   
+   The API key should be obtained from [The News API](https://www.thenewsapi.com/).
 
 ---
 
@@ -87,29 +90,11 @@ nohup gunicorn --workers 3 --bind 0.0.0.0:8000 instanews.wsgi:application > guni
 
 ---
 
-## Step 6: allow pot 8000 exposure
+## Step 6: Ensure Required Ports Are Available
 
-### 1. **Install ufw**
+Make sure that ports `8000` (Gunicorn) and `80` (Nginx) are accessible to allow incoming traffic to your application. Adjust firewall rules or cloud security settings as necessary to ensure these ports are open.
 
-```bash
-sudo apt update
-sudo apt install ufw
-```
-
-### 2. **Add rules**
-
-This will allow them to be accessed at 8000
-
-```bash
-sudo ufw allow 8000
-```
-
-Enable the ufw
-
-```bash
-sudo ufw enable
-sudo ufw status
-```
+---
 
 # Set Up Load Balancing with Nginx
 
@@ -120,10 +105,9 @@ If you want to set up Nginx as a load balancer for multiple Django servers, foll
 Modify the `/etc/nginx/sites-available/instanews` file to define multiple backend servers (Django instances). Add the `upstream` directive to define the backend servers and balance the load.
 
 ```nginx
-
 upstream django_backend {
     # Define the backend servers (Django apps)
-    server 54.237.193.140:8000;  # First server (Nginx on 80)
+    server 54.237.193.140:8000;  # First server (Gunicorn on 8000)
     server 192.168.1.102:8000;  # Second server (Gunicorn on 8000)
 }
 
@@ -139,9 +123,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-
 ```
-### 3. **Enable Nginx Configuration**
+
+### 2. **Enable Nginx Configuration**
 
 Enable the Nginx configuration by linking it to the `sites-enabled` directory:
 
@@ -151,10 +135,10 @@ sudo ln -s /etc/nginx/sites-available/instanews /etc/nginx/sites-enabled/
 
 This configuration enables load balancing between two backend servers:
 
-- `54.237.193.140:8000` (Nginx server)
+- `54.237.193.140:8000` (Gunicorn server)
 - `192.168.1.102:8000` (Gunicorn server)
 
-### 2. **Restart Nginx for Load Balancing**
+### 3. **Restart Nginx for Load Balancing**
 
 Once you've updated the configuration, restart Nginx to enable load balancing:
 
@@ -180,3 +164,5 @@ If you’ve configured load balancing, Nginx will distribute the incoming traffi
 
 - Ensure that you configure your DNS or `server_name` directive in Nginx correctly to point to your actual server IP.
 - If you want to set up SSL, consider using **Let's Encrypt** to configure HTTPS for secure communication.
+- You can also configure the domains instead of server ip to be accessed in browsers!
+

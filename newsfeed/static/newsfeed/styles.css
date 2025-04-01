@@ -337,3 +337,41 @@ body {
   cursor: pointer;
   font-size: 16px;
 }
+
+
+
+.api-reference img {
+  height: calc(100% - 10px);
+  margin: 5px;
+}
+
+.api-reference a {
+  height: 40px;
+  display: flex
+;
+  overflow: hidden;
+}
+.api-reference p {
+  font-size: small;
+  font-weight: lighter;
+  display: flex
+;
+  height: 10px;
+  padding-inline: 10px;
+}
+.api-reference {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex
+;
+  flex-direction: column;
+  height: 80px;
+  width: max-content;
+  margin: 20px;
+  overflow: hidden;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  background: inherit;
+  border-radius: 10px;
+  z-index: 20;
+}
